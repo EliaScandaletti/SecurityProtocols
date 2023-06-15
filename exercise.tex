@@ -1,0 +1,117 @@
+\documentclass{article}
+
+\usepackage{amsfonts}
+\usepackage{bussproofs}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{lscape}
+
+\title{
+    Exercises Submission
+    \\ \Large
+    Automated Analysis of Security Protocols
+    }
+\author{Elia Scandaletti - 2087934}
+
+\newcommand{\pk}[1]{\texttt{pk}(#1)}
+\newcommand{\senc}[2]{\texttt{senc}(#1, #2)}
+\newcommand{\aenc}[2]{\texttt{aenc}(#1, #2)}
+\newcommand{\pair}[2]{\left\langle #1, #2\right\rangle}
+\newcommand{\sdec}[2]{\texttt{sdec}(#1, #2)}
+\newcommand{\adec}[2]{\texttt{adec}(#1, #2)}
+\newcommand{\Sdec}[2]{\sdec{\senc{#1}{#2}}{#2}}
+\newcommand{\Adec}[2]{\adec{\aenc{#1}{\pk{#2}}}{#2}}
+\newcommand{\fst}[1]{\texttt{fst}(#1)}
+\newcommand{\snd}[1]{\texttt{snd}(#1)}
+
+\begin{document}
+\maketitle
+
+\paragraph{Exercise 1}
+\subparagraph{1.}
+The following tree solves the deduction
+$$
+    sk_A,
+    sk_B,
+    \aenc{n_A}{\pk{sk_B}},
+    \senc{\aenc{n_B}{\pk{sk_A}}}{n_A},
+    \senc{s}{\pair{n_A}{n_B}}
+    \vdash_{\mathcal{I}_{DY}} s
+$$
+
+\begin{center}
+    \makebox[0pt][c]{%
+        \begin{minipage}{\paperwidth}
+            \begin{prooftree}
+                \AxiomC{$\senc{s}{\pair{n_A}{n_B}}$}
+                \AxiomC{$\aenc{n_A}{\pk{sk_B}}$}
+                \AxiomC{$sk_B$}
+                \BinaryInfC{$n_A$}
+                \AxiomC{$\senc{\aenc{n_B}{\pk{sk_A}}}{n_A}$}
+                \AxiomC{$\aenc{n_A}{\pk{sk_B}}$}
+                \AxiomC{$sk_B$}
+                \BinaryInfC{$n_A$}
+                \BinaryInfC{$\aenc{n_B}{\pk{sk_A}}$}
+                \AxiomC{$sk_A$}
+                \BinaryInfC{$n_B$}
+                \BinaryInfC{$\pair{n_A}{n_B}$}
+                \BinaryInfC{$s$}
+            \end{prooftree}
+        \end{minipage}
+    }
+\end{center}
+
+\subparagraph{2.}
+$\mathcal{I}_{DY}$ is called a local theory because, by definition of local theory, for any finite set of terms $S$, for any term $t$ such that $S \vdash_{\mathcal{I}_{DY}} t$, there exist a proof tree $\Pi$ of $S \vdash_{\mathcal{I}_{DY}} t$ such that every label in $\Pi$ is in $\texttt{st}(S) \cup \{t\}$.
+
+This property of the $\mathcal{I}_{DY}$ inference system can be proven by induction on the size of $\Pi$.
+
+$\mathcal{I}_{DY}$ being a local theory implies that for any $S$, for any $t$, $S \vdash_{\mathcal{I}_{DY}} t$ is decidable in polynomial time.
+
+\paragraph{Exercise 2}
+\subparagraph{1.}
+The following tree solves the deduction
+$$
+    sk_A,
+    sk_B,
+    \aenc{n_A}{\pk{sk_B}},
+    \senc{\aenc{n_B}{\pk{sk_A}}}{n_A},
+    \senc{s}{\pair{n_A}{n_B}}
+    \vdash_{E_{enc}} s
+$$
+
+\begin{center}
+    \makebox[0pt][c]{%
+        \begin{minipage}{\paperwidth}
+            \begin{prooftree}
+                \AxiomC{$\senc{s}{\pair{n_A}{n_B}}$}
+                \AxiomC{$\aenc{n_A}{\pk{sk_B}}$}
+                \AxiomC{$sk_B$}
+                \BinaryInfC{$\Adec{n_A}{sk_B}$}
+                \UnaryInfC{$n_A$}
+                \AxiomC{$\senc{\aenc{n_B}{\pk{sk_A}}}{n_A}$}
+                \AxiomC{$\aenc{n_A}{\pk{sk_B}}$}
+                \AxiomC{$sk_B$}
+                \BinaryInfC{$\Adec{n_A}{sk_B}$}
+                \UnaryInfC{$n_A$}
+                \BinaryInfC{$\Sdec{\aenc{n_B}{\pk{sk_A}}}{n_A}$}
+                \UnaryInfC{$\aenc{n_B}{\pk{sk_A}}$}
+                \AxiomC{$sk_A$}
+                \BinaryInfC{$\Adec{n_B}{sk_A}$}
+                \UnaryInfC{$n_B$}
+                \BinaryInfC{$\pair{n_A}{n_B}$}
+                \BinaryInfC{$\Sdec{s}{\pair{n_A}{n_B}}$}
+                \UnaryInfC{$s$}
+            \end{prooftree}
+        \end{minipage}
+    }
+\end{center}
+
+\paragraph{Exercise 3}
+\subparagraph{1.}
+Let $M = \texttt{h}(y)$ and $N = x$.
+Then we have $(M \neq_{E_{enc}} N)_{\varphi_1} \mbox{ and } (M =_{E_{enc}} N)_{\varphi_2}$.
+
+\subparagraph{2.}
+$\varphi_1$ and $\varphi_2$ are statically equivalent because their only ``difference'' is hidden behind an asymmetric encryption of which the private key is not known.
+
+\end{document}

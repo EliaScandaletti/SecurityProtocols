@@ -112,6 +112,7 @@ Let $M = \texttt{h}(y)$ and $N = x$.
 Then we have $(M \neq_{E_{enc}} N)_{\varphi_1} \mbox{ and } (M =_{E_{enc}} N)_{\varphi_2}$.
 
 \subparagraph{2.}
-$\varphi_1$ and $\varphi_2$ are statically equivalent because their only ``difference'' is hidden behind an asymmetric encryption of which the private key is not known.
+$\varphi_1$ and $\varphi_2$ are statically equivalent because their only ``difference'' is hidden behind an asymmetric encryption of which the private key is not known and therefore cannot be accessed by decrypting $x$.
+Additionally, it is not possible to create a term equivalent to $x$ because it would require knowing $k$.
 
 \end{document}

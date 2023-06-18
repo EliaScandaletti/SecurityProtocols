@@ -1,0 +1,77 @@
+channel c.
+
+type pkey.
+type skey.
+fun pk(skey): pkey.
+fun aenc(bitstring, pkey): bitstring.
+reduc forall x: bitstring, y: skey;
+    adec(aenc(x,pk(y)), y) = x.
+
+type key.
+fun senc(bitstring, key): bitstring.
+reduc forall x: bitstring, y: key;
+    sdec(senc(x,y), y) = x.
+fun to_key(bitstring): key.
+
+fun id(pkey): bitstring.
+reduc forall k: pkey;
+    pk_of(id(k)) = k.
+
+fun h(bitstring): bitstring.
+
+event sent(bitstring, pkey).
+event ack_OK(bitstring, skey, pkey).
+event received(bitstring, skey, pkey).
+
+let S(k_AS: key, k_BS: key) =
+    in(c, x: bitstring);
+    let (a: bitstring, id_B: bitstring) = sdec(x, k_AS) in
+    let b = senc(a, k_BS) in
+    out(c, b).
+
+let A(sk_A: skey, k_AS: key, pk_B: pkey) =
+    let pk_A = pk(sk_A) in
+    out(c, senc((aenc(id(pk_A), pk_B), id(pk_B)), k_AS));
+    in(c, x: bitstring);
+    let N_b = adec(x, sk_A) in
+    new m: bitstring;
+    event sent(m, pk_A);
+    out(c, senc(m, to_key(N_b)));
+    in(c, y: bitstring);
+    if y = h(m) then
+        event ack_OK(m, sk_A, pk_B).
+
+let B(sk_B: skey, k_BS: key) =
+    let pk_B = pk(sk_B) in
+    in(c, x: bitstring);
+    let a = adec(sdec(x, k_BS), sk_B) in
+    new N_b: bitstring;
+    out(c, aenc(N_b, pk_of(a)));
+    in(c, M: bitstring);
+    let m = sdec(M, to_key(N_b)) in
+    event received(m, sk_B, pk_of(a));
+    out(c, h(m)).
+
+(* Authentication *)
+query m: bitstring, pk_A: pkey, sk_B: skey;
+    event(received(m, sk_B, pk_A)) ==> event(sent(m, pk_A)).
+
+(* Integrity *)
+query m: bitstring, sk_A: skey, sk_B: skey;
+    event(ack_OK(m, sk_A, pk(sk_B))) ==> event(received(m, sk_B, pk(sk_A))).
+
+(* Confidentiality *)
+query m: bitstring, sk_A: skey, pk_B: pkey;
+    attacker(m) && event(ack_OK(m, sk_A, pk_B)).
+
+process
+    !new sk_A: skey;
+    new sk_B: skey;
+    new k_AS: key;
+    new k_BS: key;
+      !A(sk_A, k_AS, pk(sk_B))
+    | !B(sk_B, k_BS)
+    | !S(k_AS, k_BS)
+    | out(c, pk(sk_A))
+    | out(c, pk(sk_B))
+    

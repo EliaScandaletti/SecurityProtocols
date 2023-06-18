@@ -22,6 +22,8 @@
 \newcommand{\Adec}[2]{\adec{\aenc{#1}{\pk{#2}}}{#2}}
 \newcommand{\fst}[1]{\texttt{fst}(#1)}
 \newcommand{\snd}[1]{\texttt{snd}(#1)}
+\newcommand{\out}[2]{\texttt{out}(#1, #2)}
+\newcommand{\inn}[2]{\texttt{inn}(#1, #2)}
 
 \begin{document}
 \maketitle
@@ -114,5 +116,21 @@ Then we have $(M \neq_{E_{enc}} N)_{\varphi_1} \mbox{ and } (M =_{E_{enc}} N)_{\
 \subparagraph{2.}
 $\varphi_1$ and $\varphi_2$ are statically equivalent because their only ``difference'' is hidden behind an asymmetric encryption of which the private key is not known and therefore cannot be accessed by decrypting $x$.
 Additionally, it is not possible to create a term equivalent to $x$ because it would require knowing $k$.
+
+\paragraph{Exercise 4}
+\subparagraph{1.}
+A witness of $A \not\approx B$ is the following context
+$$
+    C[\_] =
+    \out{c}{0}.
+    \out{c}{1}.
+    \inn{c}{pk_k}.
+    \inn{c}{t}.
+    \texttt{if } t \neq \aenc{\pair{0}{1}}{pk_k}
+    \texttt{ then } \out{a}{0}
+    \ ||\ \_
+$$
+
+We have $C[A] \rightarrow^* \out{a}{0}$, while $C[B]$ will never emit on $a$.
 
 \end{document}
